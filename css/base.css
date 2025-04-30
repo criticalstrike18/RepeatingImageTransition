@@ -360,7 +360,6 @@ main {
   }
 }
 
-/* Animation elements */
 .mover {
   position: fixed;
   aspect-ratio: var(--aspect);

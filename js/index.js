@@ -1,4 +1,3 @@
-import gsap from 'gsap';
 import { preloadImages } from './utils.js';
 
 // Configuration object for animation settings
@@ -24,7 +23,8 @@ const config = {
   sineFrequency: Math.PI, // Frequency of sine wave for pathMotion 'sine'
 };
 
-// Create a deep copy of the initial global config
+// Create a deep copy of the initial global config.
+// Used to temporarily modify config per item and then reset back after animations.
 const originalConfig = { ...config };
 
 // Linear interpolation helper
@@ -34,7 +34,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const grid = document.querySelector('.grid'); // Main grid container
 const frame = document.querySelectorAll(['.frame', '.heading']); // Frame overlays
 const panel = document.querySelector('.panel'); // Panel container
-const panelContent = panel?.querySelector('.panel__content'); // Panel content
+const panelContent = panel.querySelector('.panel__content'); // Panel content
 
 let isAnimating = false; // Prevents overlapping animations
 let isPanelOpen = false; // Tracks if the panel is currently open
@@ -42,9 +42,6 @@ let currentItem = null; // Reference to the clicked item
 
 // Initialize event listeners
 const init = () => {
-  // If no panel or grid, don't initialize
-  if (!panel || !grid) return;
-
   // Attach click handlers to all grid items
   document.querySelectorAll('.grid__item').forEach((item) => {
     item.addEventListener('click', () => onGridItemClick(item));
@@ -52,7 +49,7 @@ const init = () => {
 
   // Attach click handler to the panel close link
   panelContent
-    ?.querySelector('.panel__close')
+    .querySelector('.panel__close')
     ?.addEventListener('click', (e) => {
       e.preventDefault();
       resetView();
@@ -66,7 +63,9 @@ const init = () => {
   });
 };
 
-// Extracts per-item configuration overrides from HTML data attributes
+// Extracts per-item configuration overrides from HTML data attributes.
+// Reads available data-* attributes from a clicked grid item and returns an object
+// with values to temporarily override the global config for the animation.
 const extractItemConfigOverrides = (item) => {
   const overrides = {};
 
@@ -118,8 +117,6 @@ const extractItemConfigOverrides = (item) => {
 
 // Animate hiding the frame overlay
 const hideFrame = () => {
-  if (!frame || !frame.length) return;
-  
   gsap.to(frame, {
     opacity: 0,
     duration: 0.5,
@@ -130,8 +127,6 @@ const hideFrame = () => {
 
 // Animate showing the frame overlay
 const showFrame = () => {
-  if (!frame || !frame.length) return;
-  
   gsap.to(frame, {
     opacity: 1,
     duration: 0.5,
@@ -153,7 +148,7 @@ const positionPanelBasedOnClick = (clickedItem) => {
     panel.classList.remove('panel--right');
   }
 
-  // Adjust clip path direction if enabled
+  // ✨ New logic to flip clipPathDirection if enabled
   if (config.autoAdjustHorizontalClipPath) {
     if (
       config.clipPathDirection === 'left-right' ||
@@ -197,11 +192,11 @@ const getClipPathsForDirection = (direction) => {
 
 // Handle click on a grid item and trigger the full transition
 const onGridItemClick = (item) => {
-  if (isAnimating || !panel) return;
+  if (isAnimating) return;
   isAnimating = true;
   currentItem = item;
 
-  // Merge overrides into global config temporarily
+  // ✨ Merge overrides into global config temporarily
   const overrides = extractItemConfigOverrides(item);
   Object.assign(config, overrides);
 
@@ -225,28 +220,18 @@ const onGridItemClick = (item) => {
 const extractItemData = (item) => {
   const imgDiv = item.querySelector('.grid__item-image');
   const caption = item.querySelector('figcaption');
-  
-  const h3 = caption?.querySelector('h3');
-  const p = caption?.querySelector('p');
-  
   return {
-    imgURL: imgDiv?.style.backgroundImage || '',
-    title: h3?.textContent || '',
-    desc: p?.textContent || '',
+    imgURL: imgDiv.style.backgroundImage,
+    title: caption.querySelector('h3').textContent,
+    desc: caption.querySelector('p').textContent,
   };
 };
 
 // Set the panel's background and text based on clicked item
 const setPanelContent = ({ imgURL, title, desc }) => {
-  if (!panel) return;
-  
-  const panelImg = panel.querySelector('.panel__img');
-  const panelTitle = panel.querySelector('h3');
-  const panelDesc = panel.querySelector('p');
-  
-  if (panelImg) panelImg.style.backgroundImage = imgURL;
-  if (panelTitle) panelTitle.textContent = title;
-  if (panelDesc) panelDesc.textContent = desc;
+  panel.querySelector('.panel__img').style.backgroundImage = imgURL;
+  panel.querySelector('h3').textContent = title;
+  panel.querySelector('p').textContent = desc;
 };
 
 // Calculate the center position of an element
@@ -285,8 +270,6 @@ const animateGridItems = (items, clickedItem, delays) => {
 
 // Animate the full transition (movers + panel reveal)
 const animateTransition = (startEl, endEl, imgURL) => {
-  if (!startEl || !endEl) return;
-  
   hideFrame();
 
   // Generate path between start and end
@@ -342,10 +325,10 @@ const createMoverStyle = (step, index, imgURL) => {
   const style = {
     backgroundImage: imgURL,
     position: 'fixed',
-    left: step.left + 'px',
-    top: step.top + 'px',
-    width: step.width + 'px',
-    height: step.height + 'px',
+    left: step.left,
+    top: step.top,
+    width: step.width,
+    height: step.height,
     clipPath: getClipPathsForDirection(config.clipPathDirection).from,
     zIndex: 1000 + index,
     backgroundPosition: '50% 50%',
@@ -366,8 +349,6 @@ const scheduleCleanup = (movers) => {
 
 // Reveal the final panel with animated clip-path
 const revealPanel = (endImg) => {
-  if (!panel || !panelContent || !endImg) return;
-  
   const clipPaths = getClipPathsForDirection(config.clipPathDirection);
 
   gsap.set(panelContent, { opacity: 0 });
@@ -433,7 +414,7 @@ const generateMotionPath = (startRect, endRect, steps) => {
         ? Math.sin(t * config.sineFrequency) * config.sineAmplitude
         : 0;
 
-    // Add random wobble
+    // ✨ Add random wobble
     const wobbleX = (Math.random() - 0.5) * config.wobbleStrength;
     const wobbleY = (Math.random() - 0.5) * config.wobbleStrength;
 
@@ -450,7 +431,7 @@ const generateMotionPath = (startRect, endRect, steps) => {
 
 // Reset everything and return to the initial grid view
 const resetView = () => {
-  if (isAnimating || !panel) return;
+  if (isAnimating) return;
   isAnimating = true;
 
   const allItems = document.querySelectorAll('.grid__item');
@@ -485,26 +466,8 @@ const resetView = () => {
   Object.assign(config, originalConfig);
 };
 
-// Page event handler for Astro view transitions
-const handlePageEvent = (type) => {
-  if (type === 'load') {
-    // Preload images then initialize
-    preloadImages('.grid__item-image, .panel__img').then(() => {
-      document.body.classList.remove('loading');
-      init();
-    });
-  }
-};
-
-// Check if we're in an Astro environment
-if (typeof document !== 'undefined') {
-  // Listen for Astro's lifecycle events if available
-  if (document.addEventListener) {
-    document.addEventListener('astro:page-load', () => handlePageEvent('load'));
-  } else {
-    // Regular DOM load for non-Astro environments
-    window.addEventListener('DOMContentLoaded', () => handlePageEvent('load'));
-  }
-}
-
-export { init, getClipPathsForDirection, generateMotionPath };
+// Preload images then initialize everything
+preloadImages('.grid__item-image, .panel__img').then(() => {
+  document.body.classList.remove('loading');
+  init();
+});
