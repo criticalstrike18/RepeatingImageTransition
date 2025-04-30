@@ -6,12 +6,19 @@
  */
 const preloadImages = (selector = 'img') => {
   return new Promise((resolve) => {
-      // The imagesLoaded library is used to ensure all images (including backgrounds) are fully loaded.
-      imagesLoaded(document.querySelectorAll(selector), {background: true}, resolve);
+    // Check if imagesLoaded is available
+    if (typeof imagesLoaded === 'undefined') {
+      console.warn('imagesLoaded library not found, skipping preload');
+      resolve();
+      return;
+    }
+    
+    // The imagesLoaded library is used to ensure all images (including backgrounds) are fully loaded
+    imagesLoaded(document.querySelectorAll(selector), {background: true}, resolve);
   });
 };
 
-// Exporting utility functions for use in other modules.
+// Exporting utility functions for use in other modules
 export {
   preloadImages
 };
