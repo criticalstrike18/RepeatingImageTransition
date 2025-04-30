@@ -1,4 +1,4 @@
-// Initializes smooth scrolling with Lenis and integrates it with GSAP's ScrollTrigger.
+// Initializes smooth scrolling with Lenis and integrates it with GSAP.
 // Function to set up smooth scrolling.
 const initSmoothScrolling = () => {
   // Initialize Lenis for smooth scroll effects. Lerp value controls the smoothness.

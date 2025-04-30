@@ -32,7 +32,6 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 // Cached DOM elements
 const grid = document.querySelector('.grid'); // Main grid container
-const frame = document.querySelectorAll(['.frame', '.heading']); // Frame overlays
 const panel = document.querySelector('.panel'); // Panel container
 const panelContent = panel.querySelector('.panel__content'); // Panel content
 
@@ -115,26 +114,6 @@ const extractItemConfigOverrides = (item) => {
   return overrides;
 };
 
-// Animate hiding the frame overlay
-const hideFrame = () => {
-  gsap.to(frame, {
-    opacity: 0,
-    duration: 0.5,
-    ease: 'sine.inOut',
-    pointerEvents: 'none',
-  });
-};
-
-// Animate showing the frame overlay
-const showFrame = () => {
-  gsap.to(frame, {
-    opacity: 1,
-    duration: 0.5,
-    ease: 'sine.inOut',
-    pointerEvents: 'auto',
-  });
-};
-
 // Position the panel based on which side the item was clicked
 const positionPanelBasedOnClick = (clickedItem) => {
   const centerX = getElementCenter(clickedItem).x;
@@ -148,7 +127,7 @@ const positionPanelBasedOnClick = (clickedItem) => {
     panel.classList.remove('panel--right');
   }
 
-  // ✨ New logic to flip clipPathDirection if enabled
+  // Adjust clip path direction if needed
   if (config.autoAdjustHorizontalClipPath) {
     if (
       config.clipPathDirection === 'left-right' ||
@@ -196,7 +175,7 @@ const onGridItemClick = (item) => {
   isAnimating = true;
   currentItem = item;
 
-  // ✨ Merge overrides into global config temporarily
+  // Merge overrides into global config temporarily
   const overrides = extractItemConfigOverrides(item);
   Object.assign(config, overrides);
 
@@ -270,8 +249,6 @@ const animateGridItems = (items, clickedItem, delays) => {
 
 // Animate the full transition (movers + panel reveal)
 const animateTransition = (startEl, endEl, imgURL) => {
-  hideFrame();
-
   // Generate path between start and end
   const path = generateMotionPath(
     startEl.getBoundingClientRect(),
@@ -325,10 +302,10 @@ const createMoverStyle = (step, index, imgURL) => {
   const style = {
     backgroundImage: imgURL,
     position: 'fixed',
-    left: step.left,
-    top: step.top,
-    width: step.width,
-    height: step.height,
+    left: step.left + 'px',
+    top: step.top + 'px',
+    width: step.width + 'px',
+    height: step.height + 'px',
     clipPath: getClipPathsForDirection(config.clipPathDirection).from,
     zIndex: 1000 + index,
     backgroundPosition: '50% 50%',
@@ -414,7 +391,7 @@ const generateMotionPath = (startRect, endRect, steps) => {
         ? Math.sin(t * config.sineFrequency) * config.sineAmplitude
         : 0;
 
-    // ✨ Add random wobble
+    // Add random wobble
     const wobbleX = (Math.random() - 0.5) * config.wobbleStrength;
     const wobbleY = (Math.random() - 0.5) * config.wobbleStrength;
 
@@ -447,7 +424,6 @@ const resetView = () => {
       },
     })
     .to(panel, { opacity: 0 })
-    .add(showFrame, 0)
     .set(panel, { opacity: 0, pointerEvents: 'none' })
     .set(panel.querySelector('.panel__img'), {
       clipPath: 'inset(0% 0% 100% 0%)',
