@@ -42,6 +42,11 @@ let currentItem = null; // Reference to the clicked item
 
 // Initialize event listeners
 const init = () => {
+  // Initialize background images from data attributes
+  document.querySelectorAll('[data-bg]').forEach(el => {
+    el.style.backgroundImage = `url(${el.dataset.bg})`;
+  });
+
   // Attach click handlers to all grid items
   document.querySelectorAll('.grid__item').forEach((item) => {
     item.addEventListener('click', () => onGridItemClick(item));
@@ -221,7 +226,7 @@ const extractItemData = (item) => {
   const imgDiv = item.querySelector('.grid__item-image');
   const caption = item.querySelector('figcaption');
   return {
-    imgURL: imgDiv.style.backgroundImage,
+    imgURL: imgDiv.style.backgroundImage || `url(${imgDiv.dataset.bg})`,
     title: caption.querySelector('h3').textContent,
     desc: caption.querySelector('p').textContent,
   };
@@ -286,6 +291,12 @@ const animateTransition = (startEl, endEl, imgURL) => {
     const mover = document.createElement('div');
     mover.className = 'mover';
     gsap.set(mover, createMoverStyle(step, index, imgURL));
+    
+    // Set blend mode as data attribute instead of inline style
+    if (config.moverBlendMode) {
+      mover.setAttribute('data-blend-mode', config.moverBlendMode);
+    }
+    
     fragment.appendChild(mover);
 
     const delay = index * config.stepInterval;
@@ -334,7 +345,7 @@ const createMoverStyle = (step, index, imgURL) => {
     backgroundPosition: '50% 50%',
     rotationZ: gsap.utils.random(-config.rotationRange, config.rotationRange),
   };
-  if (config.moverBlendMode) style.mixBlendMode = config.moverBlendMode;
+  // Note: mixBlendMode is handled via data-blend-mode attribute now
   return style;
 };
 

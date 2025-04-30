@@ -374,3 +374,26 @@ main {
     --column-count: 8;
   }
 }
+
+/* Background image handler - default state before JS initialization */
+[data-bg] {
+  background-image: none; /* Will be set via JS */
+}
+
+/* Ensure consistent background properties for all image elements */
+.grid__item-image, 
+.panel__img {
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+/* Blend mode options for mover elements through data attributes */
+.mover[data-blend-mode="hard-light"] { mix-blend-mode: hard-light; }
+.mover[data-blend-mode="multiply"] { mix-blend-mode: multiply; }
+.mover[data-blend-mode="overlay"] { mix-blend-mode: overlay; }
+.mover[data-blend-mode="screen"] { mix-blend-mode: screen; }
+.mover[data-blend-mode="difference"] { mix-blend-mode: difference; }
+.mover[data-blend-mode="exclusion"] { mix-blend-mode: exclusion; }
+.mover[data-blend-mode="color-dodge"] { mix-blend-mode: color-dodge; }
+.mover[data-blend-mode="color-burn"] { mix-blend-mode: color-burn; }
+.mover[data-blend-mode="luminosity"] { mix-blend-mode: luminosity; }
