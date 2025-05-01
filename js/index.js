@@ -40,7 +40,34 @@ let isAnimating = false; // Prevents overlapping animations
 let isPanelOpen = false; // Tracks if the panel is currently open
 let currentItem = null; // Reference to the clicked item
 
-// Initialize event listeners
+// Function to initialize product card interactivity
+const initializeProductInteractivity = () => {
+  const colorButtons = document.querySelectorAll('.color-btn');
+  const sizeButtons = document.querySelectorAll('.size-btn');
+  
+  // Set initial selection
+  if (colorButtons.length > 0) colorButtons[0].classList.add('selected');
+  if (sizeButtons.length > 0) {
+    const mButton = Array.from(sizeButtons).find(btn => btn.getAttribute('data-size') === 'M');
+    if (mButton) mButton.classList.add('selected');
+  }
+  
+  colorButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      colorButtons.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+    });
+  });
+  
+  sizeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      sizeButtons.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+    });
+  });
+};
+
+// Initialize |event listeners
 const init = () => {
   // Initialize background images from data attributes
   document.querySelectorAll('[data-bg]').forEach(el => {
@@ -232,9 +259,14 @@ const extractItemData = (item) => {
   };
 };
 
-// Set the panel's background and text based on clicked item
+// Set the panel's background, t-shirt design, and text based on clicked item
 const setPanelContent = ({ imgURL, title, desc }) => {
+  // Set panel background image
   panel.querySelector('.panel__img').style.backgroundImage = imgURL;
+  // Set t-shirt design image src (remove url() wrapper if present)
+  const cleanImgURL = imgURL.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+  panel.querySelector('.tshirt-design').src = cleanImgURL;
+  // Set title and description
   panel.querySelector('h3').textContent = title;
   panel.querySelector('p').textContent = desc;
 };
@@ -393,6 +425,7 @@ const revealPanel = (endImg) => {
         onComplete: () => {
           isAnimating = false;
           isPanelOpen = true;
+          initializeProductInteractivity();
         },
       },
       '<-=.2'
