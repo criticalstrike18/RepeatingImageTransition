@@ -60,12 +60,37 @@ const init = () => {
       resetView();
     });
 
+    const setupButtonSelections = () => {
+      // Color button selection
+      document.querySelectorAll('.panel__color-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault(); // Prevent any default action
+          document.querySelectorAll('.panel__color-btn').forEach(b => 
+            b.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    
+      // Size button selection
+      document.querySelectorAll('.panel__size-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault(); // Prevent any default action
+          // Find all size buttons in the same group (color or gender)
+          const group = this.closest('.panel__size-options');
+          group.querySelectorAll('.panel__size-btn').forEach(b => 
+            b.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    };
+
   // Handle Escape key to close the panel
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isPanelOpen && !isAnimating) {
       resetView();
     }
   });
+  
 };
 
 // Extracts per-item configuration overrides from HTML data attributes.
@@ -234,9 +259,16 @@ const extractItemData = (item) => {
 
 // Set the panel's background and text based on clicked item
 const setPanelContent = ({ imgURL, title, desc }) => {
+  // Set the panel background image
   panel.querySelector('.panel__img').style.backgroundImage = imgURL;
-  panel.querySelector('h3').textContent = title;
-  panel.querySelector('p').textContent = desc;
+  
+  // Set the title and description
+  const topContent = panel.querySelector('.panel__top-content');
+  
+  // Update the t-shirt design image
+  // Extract the actual image URL from the background-image CSS property
+  const actualImageUrl = imgURL.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
+  panel.querySelector('.panel__tshirt-design').src = actualImageUrl;
 };
 
 // Calculate the center position of an element
@@ -393,6 +425,7 @@ const revealPanel = (endImg) => {
         onComplete: () => {
           isAnimating = false;
           isPanelOpen = true;
+          setupButtonSelections();
         },
       },
       '<-=.2'
