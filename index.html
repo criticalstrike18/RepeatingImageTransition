@@ -11,6 +11,7 @@
     <link rel="shortcut icon" href="https://tympanus.net/favicon/favicon.ico" />
     <link rel="stylesheet" href="https://use.typekit.net/qvq2ysy.css" />
     <link rel="stylesheet" type="text/css" href="css/base.css" />
+    <link rel="stylesheet" type="text/css" href="css/variant-manager.css" />
     <script>
       document.documentElement.className = 'js';
     </script>
@@ -1335,5 +1336,19 @@
     <script src="js/smoothscroll.js"></script>
     <!-- Scripts for the effect -->
     <script type="module" src="js/index.js"></script>
+    <!-- variant script -->
+    <script type="module">
+      import VariantManager from './js/variant-manager.js';
+      
+      // Wait for DOM to be fully loaded
+      window.addEventListener('DOMContentLoaded', () => {
+        try {
+          console.log('Creating Variant Manager instance');
+          window.variantManager = new VariantManager();
+        } catch (error) {
+          console.error('Error initializing Variant Manager:', error);
+        }
+      });
+    </script>
   </body>
 </html>

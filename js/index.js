@@ -244,6 +244,9 @@ const onGridItemClick = (item) => {
     panel.querySelector('.panel__img'),
     imgURL
   );
+  if (window.variantManager && typeof window.variantManager.setupButtonSelections === 'function') {
+    window.variantManager.setupButtonSelections();
+  }
 };
 
 // Extract image URL and caption text from a grid item
