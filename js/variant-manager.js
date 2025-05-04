@@ -88,8 +88,6 @@ export default class VariantManager {
   initUI() {
     // Create variant manager panel
     this.createVariantPanel();
-    // Create indicator instead of toggle button
-    this.createIndicator();
     // Attach event listeners
     this.attachEvents();
   }
